@@ -17,6 +17,13 @@ function Layout() {
             
             {user ? (
               <div className="flex items-center gap-4">
+                <Link 
+                  to="/admin" 
+                  className="text-primary font-bold hover:text-secondary transition-colors"
+                >
+                  Mi Panel
+                </Link>
+
                 <span className="text-sm font-bold text-gray-700">Hola, {user.nombre}</span>
                 <button onClick={logout} className="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-200">
                   Salir
@@ -31,7 +38,6 @@ function Layout() {
         </div>
       </header>
 
-      {/* Acá se renderizan las páginas (Home, Torneos, Login, etc) */}
       <main className="flex-grow">
         <Outlet />
       </main>
