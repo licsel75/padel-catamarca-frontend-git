@@ -11,7 +11,7 @@ function Home() {
       {/* Hero Section */}
       <section className="bg-primary text-white py-20 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-black mb-4">
-          Competí. Sumá puntos. <br />
+          Jugá. Divertite. Competí. <br />
           <span className="text-secondary">Subí de categoría.</span>
         </h1>
         <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8">
