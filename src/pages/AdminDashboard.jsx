@@ -1,15 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function AdminDashboard() {
   const { user } = useAuth();
+
+  // Leo los parámetros de consulta de la URL (ej: "/admin?tab=favoritos") para abrir la pestaña solicitada
+  const [searchParams] = useSearchParams();
+  const tabUrl = searchParams.get('tab');
+
+  // Defino banderas de permisos según el rol del usuario autenticado para controlar la interfaz
   const esAdmin = user?.rol === 'admin';
   const esGestor = ['admin', 'organizador', 'dueño_club'].includes(user?.rol);
+  const esProfesor = user?.rol === 'profesor';
 
-  // Pestaña inicial según rol
-  const [tab, setTab] = useState(esGestor ? 'clubes' : 'favoritos');
+  // Los roles con privilegios de publicación requieren que el admin haya aprobado su cuenta
+  const requiereAprobacion = ['organizador', 'dueño_club', 'profesor'].includes(user?.rol);
+  const cuentaPendiente = requiereAprobacion && !user?.rolAprobado;
+
+  // Elijo la pestaña inicial: priorizo el parámetro "?tab=" de la URL; si no existe,
+  // los gestores arrancan en "clubes" y los jugadores/profesores en "favoritos"
+  const [tab, setTab] = useState(tabUrl || (esGestor ? 'clubes' : 'favoritos'));
 
   const [clubes, setClubes] = useState([]);
   const [torneos, setTorneos] = useState([]);
@@ -19,15 +31,22 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Sincronizo la pestaña activa si el usuario hace clic en "Favoritos" desde el menú estando ya dentro de /admin
+  useEffect(() => {
+    if (tabUrl) {
+      setTab(tabUrl);
+    }
+  }, [tabUrl]);
+
   const cargarDatos = async () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Todos cargan sus favoritos
+      // 1. Todos los roles (incluyendo jugador y profesor) cargan su agenda de favoritos
       const resFav = await api.get('/favoritos');
       setFavoritos(resFav.data);
 
-      // 2. Gestores (admin, organizador, dueño_club) cargan clubes y torneos
+      // 2. Solo los gestores de eventos cargan clubes y torneos
       if (esGestor) {
         const [resClubes, resTorneos] = await Promise.all([
           api.get('/clubes'),
@@ -35,16 +54,17 @@ function AdminDashboard() {
         ]);
 
         if (esAdmin) {
+          // El administrador tiene visibilidad global de todos los registros
           setClubes(resClubes.data);
           setTorneos(resTorneos.data);
         } else {
-          // Organizador / dueño_club solo ve los suyos
+          // Organizador y dueño de club filtran únicamente los recursos de su propiedad
           setClubes(resClubes.data.filter((c) => (c.usuario?._id || c.usuario) === user.id));
           setTorneos(resTorneos.data.filter((t) => (t.usuario?._id || t.usuario) === user.id));
         }
       }
 
-      // 3. Solo admin carga usuarios
+      // 3. Únicamente el administrador descarga el listado completo de usuarios para moderación
       if (esAdmin) {
         const resUsers = await api.get('/users');
         setUsuarios(resUsers.data);
@@ -82,10 +102,11 @@ function AdminDashboard() {
     }
   };
 
-  // --- ACCIONES USUARIOS (SOLO ADMIN) ---
+  // --- ACCIONES USUARIOS (MODERACIÓN EXCLUSIVA DEL ADMIN) ---
   const handleAprobarUsuario = async (id) => {
     try {
       await api.put(`/users/${id}/aprobar`);
+      // Actualizo el estado local de forma optimista sin necesidad de recargar toda la tabla
       setUsuarios((prev) =>
         prev.map((u) => (u._id === id ? { ...u, rolAprobado: true } : u))
       );
@@ -115,13 +136,14 @@ function AdminDashboard() {
     }
   };
 
+  // Regla de negocio: un organizador o dueño puede crear hasta 5 clubes; el admin no tiene límite
   const limiteClubesAlcanzado = !esAdmin && clubes.length >= 5;
 
   if (loading) return <p className="text-center mt-10">Cargando panel... ⏳</p>;
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4">
-      {/* CABECERA */}
+      {/* CABECERA CON ROL Y BOTONES DE ACCIÓN SEGÚN PERMISOS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-primary">
@@ -132,8 +154,8 @@ function AdminDashboard() {
           </p>
         </div>
 
-        {/* BOTONES DE CREACIÓN RÁPIDA */}
-        {esGestor && (
+        {/* BOTONES DE CREACIÓN PARA GESTORES APROBADOS */}
+        {esGestor && !cuentaPendiente && (
           <div className="flex flex-wrap gap-3">
             {limiteClubesAlcanzado ? (
               <span
@@ -159,7 +181,25 @@ function AdminDashboard() {
             </Link>
           </div>
         )}
+
+        {/* BOTÓN DE PUBLICIDAD PARA PROFESORES APROBADOS */}
+        {esProfesor && !cuentaPendiente && (
+          <Link
+            to="/admin/mi-anuncio-profesor"
+            className="bg-secondary text-primary font-bold px-5 py-3 rounded-lg hover:bg-lime-500 transition-colors text-sm shadow-sm"
+          >
+            🎓 Mi Anuncio de Profesor
+          </Link>
+        )}
       </div>
+
+      {/* CARTEL INFORMATIVO SI LA CUENTA AÚN ESPERA APROBACIÓN DEL ADMINISTRADOR */}
+      {cuentaPendiente && (
+        <div className="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-xl mb-6 text-sm">
+          ⏳ <strong>Tu cuenta como {user?.rol} está pendiente de aprobación.</strong>{' '}
+          Un administrador revisará tu solicitud para habilitar tus herramientas de publicación. Mientras tanto, ya podés guardar torneos en <strong>Mis Favoritos</strong>.
+        </div>
+      )}
 
       {/* PESTAÑAS DE NAVEGACIÓN */}
       <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-6 pb-2">
@@ -210,7 +250,7 @@ function AdminDashboard() {
 
       {/* ==================== TAB 1: CLUBES ==================== */}
       {tab === 'clubes' && esGestor && (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-primary text-white">
               <tr>
@@ -256,7 +296,7 @@ function AdminDashboard() {
 
       {/* ==================== TAB 2: TORNEOS ==================== */}
       {tab === 'torneos' && esGestor && (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-primary text-white">
               <tr>
@@ -308,7 +348,7 @@ function AdminDashboard() {
 
       {/* ==================== TAB 3: USUARIOS (SOLO ADMIN) ==================== */}
       {tab === 'usuarios' && esAdmin && (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-primary text-white">
               <tr>
@@ -347,7 +387,14 @@ function AdminDashboard() {
                     )}
                   </td>
                   <td className="p-4 text-center">
-                    <div className="flex justify-center gap-2">
+                    <div className="flex justify-center items-center gap-3">
+                      <Link
+                        to={`/admin/usuarios/editar/${u._id}`}
+                        className="text-blue-500 hover:text-blue-700 font-semibold text-sm"
+                      >
+                        Editar
+                      </Link>
+
                       {!u.rolAprobado && (
                         <button
                           onClick={() => handleAprobarUsuario(u._id)}
@@ -380,7 +427,7 @@ function AdminDashboard() {
 
       {/* ==================== TAB 4: FAVORITOS (TODOS LOS ROLES) ==================== */}
       {tab === 'favoritos' && (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-primary text-white">
               <tr>

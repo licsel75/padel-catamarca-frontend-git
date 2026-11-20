@@ -140,7 +140,7 @@ function TorneoForm() {
               {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre.message}</p>}
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-bold mb-1">Fecha Inicio *</label>
                 <input
@@ -165,11 +165,10 @@ function TorneoForm() {
                 {clubesDisponibles.map((club) => (
                   <label
                     key={club._id}
-                    className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${
-                      clubesSeleccionados.includes(club._id)
+                    className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${clubesSeleccionados.includes(club._id)
                         ? 'border-primary bg-blue-50 font-semibold'
                         : 'border-gray-200 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -190,11 +189,10 @@ function TorneoForm() {
                     type="button"
                     key={cat}
                     onClick={() => toggleCategoria(cat)}
-                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
-                      categoriasSeleccionadas.includes(cat)
+                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${categoriasSeleccionadas.includes(cat)
                         ? 'bg-primary text-white border-primary'
                         : 'bg-gray-100 text-gray-600 border-gray-300'
-                    }`}
+                      }`}
                   >
                     {cat}
                   </button>
@@ -202,31 +200,31 @@ function TorneoForm() {
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-bold mb-1">Premio (Máx. 50 caracteres)</label>
-                <input
-                  type="text"
-                  {...register('premio', { maxLength: 50 })}
-                  className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-secondary outline-none"
-                  placeholder="Ej: Trofeo + $100.000"
-                />
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+  <div className="flex-1">
+    <label className="block text-sm font-bold mb-1">Premio (Máx. 50 caracteres)</label>
+    <input
+      type="text"
+      {...register('premio', { maxLength: 50 })}
+      className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-secondary outline-none"
+      placeholder="Ej: Trofeo + $100.000"
+    />
+  </div>
 
-              {id && (
-                <div className="w-1/3">
-                  <label className="block text-sm font-bold mb-1">Estado</label>
-                  <select
-                    {...register('estado')}
-                    className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-secondary outline-none bg-white"
-                  >
-                    <option value="abierto">Abierto</option>
-                    <option value="en curso">En curso</option>
-                    <option value="finalizado">Finalizado</option>
-                  </select>
-                </div>
-              )}
-            </div>
+  {id && (
+    <div className="w-full sm:w-1/3">
+      <label className="block text-sm font-bold mb-1">Estado</label>
+      <select
+        {...register('estado')}
+        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-secondary outline-none bg-white"
+      >
+        <option value="abierto">Abierto</option>
+        <option value="en curso">En curso</option>
+        <option value="finalizado">Finalizado</option>
+      </select>
+    </div>
+  )}
+</div>
 
             <div className="flex gap-4 mt-6">
               <button

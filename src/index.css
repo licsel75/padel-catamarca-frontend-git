@@ -1,9 +1,79 @@
 @import "tailwindcss";
 
+/* Habilito la variante dark controlada por la clase .dark en el elemento raíz <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #0f172a; /* Azul oscuro del diseño de Stitch */
   --color-secondary: #84cc16; /* Verde lima/neon */
   --color-surface: #f8fafc;
   --color-text: #0f172a;
   --font-display: "Inter", sans-serif;
+}
+
+/* ==================== TEMA OSCURO GLOBAL ==================== */
+.dark {
+  --color-surface: #090d16; /* Fondo general bien profundo para dar contraste */
+  --color-text: #f1f5f9;
+  color-scheme: dark;
+}
+
+/* Tarjetas y contenedores blancos pasan a slate con borde sutil para recortar toda la card */
+.dark .bg-white {
+  background-color: #1e293b !important;
+  border: 1px solid #334155;
+}
+
+/* Encabezados de cards (Clubes, Torneos, Profesores) y cabeceras de tablas:
+   Uso un azul pizarra/marino más elevado con línea divisoria para que destaque del fondo */
+.dark .bg-primary {
+  background-color: #0f172a !important;
+  border-bottom: 1px solid #334155;
+}
+
+/* Textos oscuros pasan a tonos claros legibles */
+.dark .text-primary {
+  color: #f8fafc !important;
+}
+
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+/* Bordes sutiles en modo oscuro */
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: #334155 !important;
+}
+
+/* Etiquetas suaves (ej: niveles de profesores o roles) */
+.dark .bg-gray-100 {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Inputs, selects y textareas */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Hover de filas en tablas del Panel de Administración */
+.dark tr:hover {
+  background-color: #0f172a !important;
 }
