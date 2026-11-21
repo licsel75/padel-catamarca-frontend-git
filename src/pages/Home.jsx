@@ -5,47 +5,55 @@ import ClubCard from '../components/cards/ClubCard';
 import { DEPARTAMENTOS_CATAMARCA } from '../constants/departamentos';
 
 function Home() {
+  // Consumo el listado público de clubes usando mi custom hook useFetch
   const { data: clubes, loading, error } = useFetch('/clubes');
   const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState('Todos');
   const [busqueda, setBusqueda] = useState('');
 
-  // Filtramos los clubes por departamento y por texto (nombre o dirección)
+  // Filtro los clubes en tiempo real por departamento y por texto (nombre o dirección)
   const clubesFiltrados = clubes
     ? clubes.filter((club) => {
-        const dptoClub = club.departamento || 'Capital';
-        const coincideDpto =
-          departamentoSeleccionado === 'Todos' || dptoClub === departamentoSeleccionado;
+      const dptoClub = club.departamento || 'Capital';
+      const coincideDpto =
+        departamentoSeleccionado === 'Todos' || dptoClub === departamentoSeleccionado;
 
-        const termino = busqueda.toLowerCase().trim();
-        const coincideTexto =
-          !termino ||
-          club.nombre.toLowerCase().includes(termino) ||
-          club.direccion.toLowerCase().includes(termino);
+      const termino = busqueda.toLowerCase().trim();
+      const coincideTexto =
+        !termino ||
+        club.nombre.toLowerCase().includes(termino) ||
+        club.direccion.toLowerCase().includes(termino);
 
-        return coincideDpto && coincideTexto;
-      })
+      return coincideDpto && coincideTexto;
+    })
     : [];
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-primary text-white py-20 px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-black mb-4">
-          Jugá, divertite, competí. <br />
-          <span className="text-secondary">Subí de categoría.</span>
-        </h1>
-        <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8">
-          Toda la información del pádel Catamarqueño en un sólo lugar.
-          Clubes, torneos, jugadores destacados y mucho más.
-          Seleccioná tus torneos favoritos y armá tu agenda para todo el año.
-        </p>
+      {/* Hero Section a pantalla completa con contenido anclado en la esquina inferior izquierda */}
+      <section
+        className="relative w-full min-h-[calc(100vh-72px)] flex items-end justify-start bg-primary text-white px-6 md:px-12 lg:px-16 pb-12 md:pb-16 pt-24 text-left bg-cover bg-center bg-no-repeat border-b border-gray-800"
+        style={{
+          backgroundImage: `linear-gradient(to top right, rgba(15, 23, 42, 0.92) 15%, rgba(15, 23, 42, 0.45) 55%, rgba(15, 23, 42, 0.15) 100%), url('/landin.png')`
+        }}
+      >
+        <div className="w-full max-w-2xl">
+          <h1 className="text-4xl md:text-6xl font-black mb-5 leading-tight drop-shadow-md">
+            LA GUÍA DEL PÁDEL CATAMARQUEÑO. <br />
+            <span className="text-secondary">Clubes,
+              profesores y mucho más!
+              </span>
+          </h1>
+          <p className="text-base md:text-lg text-gray-200 mb-8 drop-shadow">
+            Explorá complejos por departamento, agendá tus próximos torneos y conectá directo con los mejores profes de la provincia.
+          </p>
 
-        <Link
-          to="/torneos"
-          className="bg-secondary text-primary text-lg font-bold px-8 py-3 rounded-lg hover:bg-lime-500 transition-colors"
-        >
-          Ver Torneos Disponibles
-        </Link>
+          <Link
+            to="/torneos"
+            className="inline-block bg-secondary text-primary text-lg font-extrabold px-8 py-4 rounded-lg hover:bg-lime-500 transition-colors shadow-lg"
+          >
+            Ver Torneos Disponibles
+          </Link>
+        </div>
       </section>
 
       {/* Sección de Clubes */}
@@ -93,11 +101,10 @@ function Home() {
                 key={dep}
                 type="button"
                 onClick={() => setDepartamentoSeleccionado(dep)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                  departamentoSeleccionado === dep
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-primary'
-                }`}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors ${departamentoSeleccionado === dep
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-primary'
+                  }`}
               >
                 {dep === 'Todos' ? 'Todos' : dep}
               </button>
