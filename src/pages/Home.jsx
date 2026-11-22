@@ -39,7 +39,7 @@ function Home() {
         <div className="w-full max-w-2xl">
           <h1 className="text-4xl md:text-6xl font-black mb-5 leading-tight drop-shadow-md">
             LA GUÍA DEL PÁDEL CATAMARQUEÑO. <br />
-            <span className="text-secondary">Clubes,
+            <span className="text-secondary">Clubes, torneos,
               profesores y mucho más!
               </span>
           </h1>
@@ -83,7 +83,7 @@ function Home() {
               onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
               className="border border-gray-300 bg-white px-4 py-2.5 rounded-lg text-sm font-semibold text-primary focus:ring-2 focus:ring-secondary outline-none w-full sm:w-56"
             >
-              <option value="Todos">📍 Todos los departamentos</option>
+              <option value="Todos">📍 Todos los deptos.</option>
               {DEPARTAMENTOS_CATAMARCA.map((dep) => (
                 <option key={dep} value={dep}>
                   {dep}

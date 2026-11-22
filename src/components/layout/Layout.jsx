@@ -25,14 +25,12 @@ function Layout() {
 
   // Helper 1: Estilo dinámico para el texto del enlace (resalta cuando está activo o al pasar el mouse)
   const linkClass = ({ isActive }) =>
-    `relative group font-bold text-sm py-1 transition-colors ${
-      isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'
+    `relative group font-bold text-sm py-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'
     }`;
 
   // Helper 2: Barra inferior verde lima que queda fija si la ruta está activa y se despliega en hover en las demás
   const underlineClass = (isActive) =>
-    `block h-0.5 bg-secondary transition-all duration-300 mt-0.5 ${
-      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+    `block h-0.5 bg-secondary transition-all duration-300 mt-0.5 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
     }`;
 
   return (
@@ -53,7 +51,7 @@ function Layout() {
             <NavLink to="/" end className={linkClass}>
               {({ isActive }) => (
                 <>
-                  <span>Inicio</span>
+                  <span>Clubes</span>
                   <span className={underlineClass(isActive)} />
                 </>
               )}
@@ -252,7 +250,17 @@ function Layout() {
       </main>
 
       <footer className="bg-primary text-white text-center py-6 mt-auto px-4">
-        <p className="text-sm">© 2026 Catamarca Pádel - Circuito Amateur</p>
+        <p className="text-sm text-gray-300">
+          © 2026 Catamarca Pádel — Desarrollado por{' '}
+          <a
+            href="https://sistemassys.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-secondary font-bold hover:underline transition-colors"
+          >
+            S&amp;S Sistemas Informáticos
+          </a>
+        </p>
       </footer>
     </div>
   );
