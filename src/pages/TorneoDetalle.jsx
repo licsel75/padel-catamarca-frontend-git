@@ -59,7 +59,6 @@ function TorneoDetalle() {
         } finally {
           setLoadingClima(false);
         }
-
       } catch (err) {
         setError('No se pudo cargar la información del torneo.');
       } finally {
@@ -136,7 +135,7 @@ function TorneoDetalle() {
           <button
             onClick={handleToggleFavorito}
             disabled={cargandoFav}
-            className={`px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md shrink-0 ${
+            className={`px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md shrink-0 cursor-pointer ${
               esFavorito
                 ? 'bg-red-100 text-red-600 hover:bg-red-200'
                 : 'bg-secondary text-primary hover:bg-lime-400'
@@ -152,7 +151,6 @@ function TorneoDetalle() {
 
         {/* GRILLA RESPONSIVA: 2 columnas para datos del torneo y 1 columna para el widget del clima */}
         <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          
           {/* COLUMNA IZQUIERDA: CATEGORÍAS, PREMIACIÓN Y CLUBES SEDE */}
           <div className="md:col-span-2 space-y-6">
             <div>
@@ -181,13 +179,24 @@ function TorneoDetalle() {
               <h2 className="text-lg font-bold text-primary mb-3">Clubes Sede</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {torneo.clubes && torneo.clubes.map((club) => (
-                  <div key={club._id} className="border border-gray-200 rounded-xl p-4 bg-surface">
-                    <h3 className="font-bold text-primary text-base">🏟️ {club.nombre}</h3>
+                  <Link
+                    key={club._id}
+                    to={`/clubes/${club._id}`}
+                    className="group block border border-gray-200 hover:border-secondary rounded-xl p-4 bg-surface transition-all shadow-sm hover:shadow-md"
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="font-bold text-primary group-hover:text-secondary transition-colors text-base">
+                        🏟️ {club.nombre}
+                      </h3>
+                      <span className="text-xs font-bold text-secondary opacity-80 group-hover:translate-x-0.5 transition-transform shrink-0">
+                        Ver club →
+                      </span>
+                    </div>
                     <p className="text-sm text-gray-600 mt-1">📍 {club.direccion}</p>
                     {club.telefono && (
                       <p className="text-sm text-gray-600 mt-1">📞 {club.telefono}</p>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -265,7 +274,6 @@ function TorneoDetalle() {
               Ideal para planificar si se juega en canchas descubiertas o techadas.
             </p>
           </div>
-
         </div>
       </div>
     </div>

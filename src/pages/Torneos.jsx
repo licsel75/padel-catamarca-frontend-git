@@ -4,18 +4,18 @@ import TorneoCard from '../components/torneo/TorneoCard';
 import { DEPARTAMENTOS_CATAMARCA } from '../constants/departamentos';
 
 function Torneos() {
-  // Consumo tanto los torneos como los clubes para cruzar departamentos y poblar los filtros
+  // Consumo tanto los torneos como los clubes desde mi API propia usando mi custom hook useFetch
   const { data: torneos, loading, error } = useFetch('/torneos');
   const { data: clubes } = useFetch('/clubes');
 
-  // Pestaña temporal: 'proximos' | 'activos' | 'pasados'
+  // Estados para controlar la pestaña temporal activa ('proximos' | 'activos' | 'pasados') y los filtros combinados
   const [tabTemporal, setTabTemporal] = useState('proximos');
   const [busqueda, setBusqueda] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('Todas');
   const [departamentoFiltro, setDepartamentoFiltro] = useState('Todos');
   const [clubFiltro, setClubFiltro] = useState('Todos');
 
-  // Armo dinámicamente el listado ordenado de clubes reales para el desplegable
+  // Construyo dinámicamente y ordeno alfabéticamente el listado único de clubes reales para poblar el selector
   const clubesDisponibles = useMemo(() => {
     const nombres = new Set();
 
@@ -42,7 +42,7 @@ function Torneos() {
     return Array.from(nombres).sort((a, b) => a.localeCompare(b));
   }, [clubes, torneos]);
 
-  // 1. Aplico pestaña temporal + buscador + categoría + departamento + club y ordeno por fecha
+  // Filtro los torneos por pestaña temporal, texto, categoría, departamento y club, y los ordeno cronológicamente
   const torneosFiltrados = useMemo(() => {
     if (!torneos) return [];
 
@@ -56,21 +56,21 @@ function Torneos() {
         inicio.setHours(0, 0, 0, 0);
         fin.setHours(23, 59, 59, 999);
 
-        // Filtro por estado temporal respecto a la fecha actual
+        // Separo automáticamente entre próximos, en curso y finalizados comparando contra la fecha actual
         if (tabTemporal === 'proximos' && (inicio <= hoy || t.estado === 'finalizado')) return false;
         if (tabTemporal === 'activos' && (hoy < inicio || hoy > fin || t.estado === 'finalizado')) return false;
         if (tabTemporal === 'pasados' && fin >= hoy && t.estado !== 'finalizado') return false;
 
-        // Filtro por nombre del torneo
+        // Filtro por coincidencia de texto en el nombre
         const termino = busqueda.toLowerCase().trim();
         const coincideTexto = !termino || t.nombre.toLowerCase().includes(termino);
 
-        // Filtro por categoría
+        // Filtro por categoría habilitada
         const coincideCategoria =
           categoriaFiltro === 'Todas' ||
           (Array.isArray(t.categorias) && t.categorias.includes(categoriaFiltro));
 
-        // Texto normalizado de las sedes del torneo para evaluar club y departamento
+        // Normalizo los nombres de las sedes del torneo para evaluar tanto el club como el departamento
         const textoSede = [
           typeof t.club === 'string' ? t.club : t.club?.nombre,
           t.sede,
@@ -84,7 +84,7 @@ function Torneos() {
         const coincideClub =
           clubFiltro === 'Todos' || textoSede.includes(clubFiltro.toLowerCase());
 
-        // Filtro por departamento (toma el dato directo del torneo o lo deduce desde el club sede)
+        // Filtro por departamento (uso el departamento directo si existe o lo deduzco cruzando con el listado de clubes)
         let coincideDpto = departamentoFiltro === 'Todos';
         if (!coincideDpto) {
           const dptoDirecto = t.departamento || t.club?.departamento;
@@ -104,12 +104,12 @@ function Torneos() {
       })
       .sort((a, b) =>
         tabTemporal === 'pasados'
-          ? new Date(b.fechaInicio) - new Date(a.fechaInicio) // Finalizados: más recientes arriba
-          : new Date(a.fechaInicio) - new Date(b.fechaInicio) // Próximos / En curso: más cercanos arriba
+          ? new Date(b.fechaInicio) - new Date(a.fechaInicio)
+          : new Date(a.fechaInicio) - new Date(b.fechaInicio)
       );
   }, [torneos, clubes, tabTemporal, busqueda, categoriaFiltro, departamentoFiltro, clubFiltro]);
 
-  // 2. Agrupo los torneos filtrados por "Mes Año" para dibujar los separadores visuales
+  // Agrupo los torneos ya filtrados por "Mes Año" usando reduce para renderizar encabezados separadores entre meses
   const torneosPorMes = useMemo(() => {
     return torneosFiltrados.reduce((grupos, torneo) => {
       const fecha = new Date(torneo.fechaInicio);
@@ -125,6 +125,7 @@ function Torneos() {
     }, {});
   }, [torneosFiltrados]);
 
+  // Restablezco todos los filtros simultáneamente cuando el usuario hace clic en limpiar
   const limpiarFiltros = () => {
     setBusqueda('');
     setCategoriaFiltro('Todas');
@@ -134,7 +135,7 @@ function Torneos() {
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4">
-      {/* ENCABEZADO */}
+      {/* ENCABEZADO DE LA SECCIÓN */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-black text-primary mb-2">Torneos de Pádel</h1>
         <p className="text-gray-500 max-w-xl mx-auto">
@@ -142,7 +143,7 @@ function Torneos() {
         </p>
       </div>
 
-      {/* PANEL DE BÚSQUEDA Y FILTROS (3 COLUMNAS) */}
+      {/* PANEL DE BÚSQUEDA Y FILTROS EN 3 COLUMNAS */}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 space-y-4">
         <input
           type="text"
@@ -216,9 +217,11 @@ function Torneos() {
         ))}
       </div>
 
+      {/* ESTADOS DE CARGA Y ERROR */}
       {loading && <p className="text-center text-gray-500 py-10">Cargando torneos... ⏳</p>}
       {error && <p className="text-center text-red-500 py-10">{error} ❌</p>}
 
+      {/* ESTADO VACÍO CUANDO NINGÚN TORNEO COINCIDE CON LOS FILTROS */}
       {!loading && !error && Object.keys(torneosPorMes).length === 0 && (
         <div className="bg-white rounded-2xl p-12 text-center border border-gray-200">
           <p className="text-gray-600 font-semibold mb-3">
