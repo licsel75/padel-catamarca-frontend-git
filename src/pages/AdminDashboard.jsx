@@ -28,6 +28,11 @@ function AdminDashboard() {
   const [usuarios, setUsuarios] = useState([]);
   const [favoritos, setFavoritos] = useState([]);
 
+  // Estados para filtrar y ordenar el listado de usuarios en el panel de administración
+  const [busquedaUsuario, setBusquedaUsuario] = useState('');
+  const [filtroRolUsuario, setFiltroRolUsuario] = useState('Todos');
+  const [soloPendientes, setSoloPendientes] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -136,6 +141,25 @@ function AdminDashboard() {
     }
   };
 
+  // Filtro y ordeno los usuarios: primero los pendientes de aprobación y luego alfabéticamente por nombre
+  const usuariosFiltrados = usuarios
+    .filter((u) => {
+      const termino = busquedaUsuario.toLowerCase().trim();
+      const coincideTexto =
+        !termino ||
+        u.nombre?.toLowerCase().includes(termino) ||
+        u.email?.toLowerCase().includes(termino);
+
+      const coincideRol = filtroRolUsuario === 'Todos' || u.rol === filtroRolUsuario;
+      const coincidePendiente = !soloPendientes || !u.rolAprobado;
+
+      return coincideTexto && coincideRol && coincidePendiente;
+    })
+    .sort((a, b) => {
+      if (a.rolAprobado !== b.rolAprobado) return Number(a.rolAprobado) - Number(b.rolAprobado);
+      return (a.nombre || '').localeCompare(b.nombre || '');
+    });
+
   // Regla de negocio: un organizador o dueño puede crear hasta 5 clubes; el admin no tiene límite
   const limiteClubesAlcanzado = !esAdmin && clubes.length >= 5;
 
@@ -179,6 +203,15 @@ function AdminDashboard() {
             >
               + Crear Torneo
             </Link>
+
+            {esAdmin && (
+              <Link
+                to="/admin/usuarios/crear"
+                className="bg-slate-800 text-white font-bold px-5 py-3 rounded-lg hover:bg-slate-700 transition-colors text-sm"
+              >
+                + Crear Usuario
+              </Link>
+            )}
           </div>
         )}
 
@@ -348,80 +381,145 @@ function AdminDashboard() {
 
       {/* ==================== TAB 3: USUARIOS (SOLO ADMIN) ==================== */}
       {tab === 'usuarios' && esAdmin && (
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-primary text-white">
-              <tr>
-                <th className="p-4">Nombre</th>
-                <th className="p-4">Email</th>
-                <th className="p-4">Rol</th>
-                <th className="p-4">Estado</th>
-                <th className="p-4 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((u) => (
-                <tr key={u._id} className="border-b border-gray-100 hover:bg-surface">
-                  <td className="p-4 font-semibold">{u.nombre}</td>
-                  <td className="p-4 text-sm text-gray-600">{u.email}</td>
-                  <td className="p-4">
-                    <span className="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-1 rounded uppercase">
-                      {u.rol}
-                    </span>
-                  </td>
-                  <td className="p-4 flex flex-col gap-1">
-                    {u.bloqueado ? (
-                      <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded w-fit">
-                        BLOQUEADO
-                      </span>
-                    ) : (
-                      <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded w-fit">
-                        ACTIVO
-                      </span>
-                    )}
+        <div className="space-y-4">
+          {/* BARRA DE FILTROS DE USUARIOS */}
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 flex-grow">
+              <input
+                type="text"
+                value={busquedaUsuario}
+                onChange={(e) => setBusquedaUsuario(e.target.value)}
+                placeholder="Buscar por nombre o email..."
+                className="border border-gray-300 bg-white px-3.5 py-2 rounded-lg text-sm focus:ring-2 focus:ring-secondary outline-none w-full sm:w-64"
+              />
 
-                    {!u.rolAprobado && (
-                      <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded w-fit">
-                        PENDIENTE APROBACIÓN
+              <select
+                value={filtroRolUsuario}
+                onChange={(e) => setFiltroRolUsuario(e.target.value)}
+                className="border border-gray-300 bg-white px-3.5 py-2 rounded-lg text-sm font-semibold text-primary focus:ring-2 focus:ring-secondary outline-none w-full sm:w-52"
+              >
+                <option value="Todos">👥 Todos los roles</option>
+                <option value="admin">Admin</option>
+                <option value="organizador">Organizador</option>
+                <option value="dueño_club">Dueño de Club</option>
+                <option value="profesor">Profesor</option>
+                <option value="jugador">Jugador</option>
+              </select>
+
+              <label className="inline-flex items-center gap-2 text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={soloPendientes}
+                  onChange={(e) => setSoloPendientes(e.target.checked)}
+                  className="accent-amber-600 cursor-pointer"
+                />
+                ⏳ Solo pendientes ({usuarios.filter((u) => !u.rolAprobado).length})
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between md:justify-end gap-3 text-xs text-gray-500">
+              <span>
+                Mostrando <strong className="text-primary">{usuariosFiltrados.length}</strong> de {usuarios.length}
+              </span>
+
+              {(busquedaUsuario || filtroRolUsuario !== 'Todos' || soloPendientes) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusquedaUsuario('');
+                    setFiltroRolUsuario('Todos');
+                    setSoloPendientes(false);
+                  }}
+                  className="font-bold text-primary hover:text-secondary underline cursor-pointer"
+                >
+                  Limpiar ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* TABLA DE USUARIOS FILTRADOS */}
+          <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-primary text-white">
+                <tr>
+                  <th className="p-4">Nombre</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Rol</th>
+                  <th className="p-4">Estado</th>
+                  <th className="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usuariosFiltrados.map((u) => (
+                  <tr key={u._id} className="border-b border-gray-100 hover:bg-surface">
+                    <td className="p-4 font-semibold">{u.nombre}</td>
+                    <td className="p-4 text-sm text-gray-600">{u.email}</td>
+                    <td className="p-4">
+                      <span className="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-1 rounded uppercase">
+                        {u.rol}
                       </span>
-                    )}
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="flex justify-center items-center gap-3">
-                      <Link
-                        to={`/admin/usuarios/editar/${u._id}`}
-                        className="text-blue-500 hover:text-blue-700 font-semibold text-sm"
-                      >
-                        Editar
-                      </Link>
+                    </td>
+                    <td className="p-4 flex flex-col gap-1">
+                      {u.bloqueado ? (
+                        <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded w-fit">
+                          BLOQUEADO
+                        </span>
+                      ) : (
+                        <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded w-fit">
+                          ACTIVO
+                        </span>
+                      )}
 
                       {!u.rolAprobado && (
-                        <button
-                          onClick={() => handleAprobarUsuario(u._id)}
-                          className="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700"
-                        >
-                          Aprobar Rol
-                        </button>
+                        <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded w-fit">
+                          PENDIENTE APROBACIÓN
+                        </span>
                       )}
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="flex justify-center items-center gap-3">
+                        <Link
+                          to={`/admin/usuarios/editar/${u._id}`}
+                          className="text-blue-500 hover:text-blue-700 font-semibold text-sm"
+                        >
+                          Editar
+                        </Link>
 
-                      {u._id !== user.id && (
-                        <button
-                          onClick={() => handleToggleBloqueo(u._id)}
-                          className={`px-3 py-1 rounded text-xs font-bold ${
-                            u.bloqueado
-                              ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                              : 'bg-red-100 text-red-600 hover:bg-red-200'
-                          }`}
-                        >
-                          {u.bloqueado ? 'Desbloquear' : 'Bloquear'}
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {!u.rolAprobado && (
+                          <button
+                            onClick={() => handleAprobarUsuario(u._id)}
+                            className="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 cursor-pointer"
+                          >
+                            Aprobar Rol
+                          </button>
+                        )}
+
+                        {u._id !== user.id && (
+                          <button
+                            onClick={() => handleToggleBloqueo(u._id)}
+                            className={`px-3 py-1 rounded text-xs font-bold cursor-pointer ${
+                              u.bloqueado
+                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                : 'bg-red-100 text-red-600 hover:bg-red-200'
+                            }`}
+                          >
+                            {u.bloqueado ? 'Desbloquear' : 'Bloquear'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {usuariosFiltrados.length === 0 && (
+              <p className="text-center p-10 text-gray-500">
+                No se encontraron usuarios con los filtros aplicados.
+              </p>
+            )}
+          </div>
         </div>
       )}
 

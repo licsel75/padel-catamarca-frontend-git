@@ -10,6 +10,14 @@ function Home() {
   const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState('Todos');
   const [busqueda, setBusqueda] = useState('');
 
+  // Función de desplazamiento suave hacia la sección de clubes
+  const irAClubes = () => {
+    const seccionClubes = document.getElementById('seccion-clubes');
+    if (seccionClubes) {
+      seccionClubes.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // Calculo dinámicamente los departamentos que tienen al menos 1 club cargado, ordenados por cantidad de clubes
   const departamentosConClubes = useMemo(() => {
     if (!Array.isArray(clubes) || clubes.length === 0) return ['Todos'];
@@ -57,7 +65,7 @@ function Home() {
       >
         <div className="w-full max-w-2xl">
           <h1 className="text-4xl md:text-6xl font-black mb-5 leading-tight drop-shadow-md">
-            LA GUÍA DEL PÁDEL CATAMARQUEÑO. <br />
+            TU GUÍA DEL PÁDEL CATAMARQUEÑO. <br />
             <span className="text-secondary">
               Clubes, torneos, profesores y mucho más!
             </span>
@@ -66,17 +74,22 @@ function Home() {
             Explorá complejos por departamento, agendá tus próximos torneos y conectá directo con los mejores profes de la provincia.
           </p>
 
-          <Link
-            to="/torneos"
-            className="inline-block bg-secondary text-primary text-lg font-extrabold px-8 py-4 rounded-lg hover:bg-lime-500 transition-colors shadow-lg"
-          >
-            Ver Torneos Disponibles
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={irAClubes}
+              className="inline-flex items-center gap-2 bg-secondary text-primary text-lg font-extrabold px-15 py-4 rounded-lg hover:bg-lime-500 transition-colors shadow-lg cursor-pointer"
+            >
+              Ver Clubes <span aria-hidden="true">↓</span>
+            </button>
+
+            
+          </div>
         </div>
       </section>
 
       {/* Sección de Clubes */}
-      <section className="max-w-6xl mx-auto py-16 px-4">
+      <section id="seccion-clubes" className="max-w-6xl mx-auto py-16 px-4 scroll-mt-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
           <div>
             <h2 className="text-3xl font-bold text-primary text-center md:text-left">

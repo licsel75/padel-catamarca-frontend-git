@@ -13,6 +13,7 @@ import TorneoForm from './pages/TorneoForm';
 import ClubForm from './pages/ClubForm';
 import ProfesorForm from './pages/ProfesorForm';
 import UserForm from './pages/UserForm';
+import UsuarioForm from './pages/UsuarioForm'
 
 
 
@@ -35,6 +36,8 @@ function App() {
 
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="admin/usuarios/editar/:id" element={<UserForm />} />
+          <Route path="/admin/usuarios/crear" element={<UsuarioForm />} />
+          <Route path="/admin/usuarios/editar/:id" element={<UsuarioForm />} />
         </Route>
 
         {/* RUTAS DE GESTIÓN DE TORNEOS Y CLUBES */}

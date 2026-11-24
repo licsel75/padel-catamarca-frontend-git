@@ -202,7 +202,7 @@ function TorneoForm() {
 
             <div className="flex flex-col sm:flex-row gap-4">
   <div className="flex-1">
-    <label className="block text-sm font-bold mb-1">Premio (Máx. 50 caracteres)</label>
+    <label className="block text-sm font-bold mb-1">Premio/Fecha límite de inscripción (Máx. 50 caracteres)</label>
     <input
       type="text"
       {...register('premio', { maxLength: 50 })}
