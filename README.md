@@ -84,6 +84,31 @@ Aprobación de cuentas pendientes y administración de roles (solo admin).
 
 
 
+## 🚧 Limitaciones del MVP y Mejoras Futuras
+
+Este proyecto fue desarrollado como un Producto Mínimo Viable (MVP) para validar la arquitectura Fullstack MERN y el flujo de gestión de torneos. Si bien es completamente funcional, se identificaron las siguientes mejoras para una versión de producción real:
+
+1. **Gestión de Imágenes de Clubes (Cloud Storage):**
+   *   *Estado actual:* Las imágenes en las tarjetas (`ClubCard`) se importan desde `src/assets` (hardcodeadas) como demostración visual.
+   *   *Mejora futura:* Agregar un campo `imagen` (String) al modelo `Club` en el Backend. Implementar un formulario con `<input type="file" />` en el panel de administración. Al subir la imagen, enviarla mediante `FormData` al Backend, almacenarla en un servicio Cloud (como Cloudinary o AWS S3), y guardar en MongoDB únicamente la URL pública. De esta forma, los dueños de clubes podrán actualizar sus fotos sin que el desarrollador modifique el código.
+
+2. **Pasarela de Pagos para Inscripciones:**
+   *   *Estado actual:* El contacto y la gestión de cupos se realiza vía WhatsApp.
+   *   *Mejora futura:* Integrar Mercado Pago (Checkout Pro) para que los jugadores puedan pagar la inscripción al torneo directamente desde la plataforma, con generación de ticket automático.
+
+3. **Gestión de Imágenes y Archivos:**
+   *   Implementar un sistema de compresión de imágenes antes de subirlas para optimizar el ancho de banda y el rendimiento de la carga.
+
+4. **Validaciones Avanzadas en el Frontend:**
+   *   Si bien se usa `react-hook-form`, a futuro se podría integrar **Zod** para tipar los esquemas de validación y compartirlos entre el Front y el Back (validación compartida).
+
+5. **Notificaciones Automáticas (Email/WhatsApp):**
+   *   Implementar un servicio de envío de correos (usando Nodemailer o Resend) para notificar a los jugadores cuando se inscriben a un torneo o cuando cambia la fecha del mismo.
+6. **CRUD Salón de la Fama:**
+   *   Todo usuario loguado puede aportar informacón sobre premiaciones , clubes etc.
+
+
+
 🏗️ Arquitectura y Decisiones Técnicas
 Estructura Modular: Organización clara en components/ (tarjetas reutilizables, navbar, footer, rutas protegidas), pages/ (vistas principales y formularios), hooks/ (useFetch), services/ (instancia configurada de Axios), context/ (estado global de autenticación y tema) y constants/ (departamentos de Catamarca).
 

@@ -39,20 +39,20 @@ function Home() {
   // Filtro los clubes en tiempo real por departamento y por texto, dejando los Sponsors primeros
   const clubesFiltrados = clubes
     ? clubes
-        .filter((club) => {
-          const dptoClub = club.departamento || 'Capital';
-          const coincideDpto =
-            departamentoSeleccionado === 'Todos' || dptoClub === departamentoSeleccionado;
+      .filter((club) => {
+        const dptoClub = club.departamento || 'Capital';
+        const coincideDpto =
+          departamentoSeleccionado === 'Todos' || dptoClub === departamentoSeleccionado;
 
-          const termino = busqueda.toLowerCase().trim();
-          const coincideTexto =
-            !termino ||
-            club.nombre.toLowerCase().includes(termino) ||
-            club.direccion.toLowerCase().includes(termino);
+        const termino = busqueda.toLowerCase().trim();
+        const coincideTexto =
+          !termino ||
+          club.nombre.toLowerCase().includes(termino) ||
+          club.direccion.toLowerCase().includes(termino);
 
-          return coincideDpto && coincideTexto;
-        })
-        .sort((a, b) => Number(Boolean(b.esSponsor)) - Number(Boolean(a.esSponsor)))
+        return coincideDpto && coincideTexto;
+      })
+      .sort((a, b) => Number(Boolean(b.esSponsor)) - Number(Boolean(a.esSponsor)))
     : [];
 
   return (
@@ -83,8 +83,14 @@ function Home() {
             >
               Ver Clubes <span aria-hidden="true">↓</span>
             </button>
+            <a
+              href="#seccion-historia"
+              className="inline-flex items-center gap-2 bg-transparent border-2 border-white/50 text-white text-lg font-bold px-6 py-3.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              Nuestra Historia ↓
+            </a>
 
-            
+
           </div>
         </div>
       </section>
@@ -133,11 +139,10 @@ function Home() {
               key={dep}
               type="button"
               onClick={() => setDepartamentoSeleccionado(dep)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-                departamentoSeleccionado === dep
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${departamentoSeleccionado === dep
                   ? 'bg-primary text-secondary shadow-sm'
                   : 'bg-white text-gray-600 border border-gray-200 hover:border-primary'
-              }`}
+                }`}
             >
               {dep}
             </button>
@@ -206,7 +211,7 @@ function Home() {
           ))}
         </div>
       </section>
-        <HistoriaSection />
+      <HistoriaSection />
     </div>
   );
 }
