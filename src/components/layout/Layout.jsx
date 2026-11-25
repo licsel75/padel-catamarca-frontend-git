@@ -51,7 +51,7 @@ function Layout() {
             <NavLink to="/" end className={linkClass}>
               {({ isActive }) => (
                 <>
-                  <span>Clubes</span>
+                  <span>Inicio</span>
                   <span className={underlineClass(isActive)} />
                 </>
               )}

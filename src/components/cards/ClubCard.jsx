@@ -1,5 +1,8 @@
 import { Link } from 'react-router';
 
+import imagenClub_00 from '../../assets/imagenClub_00.png'; 
+
+
 const normalizarUrl = (valor, baseSocial = '') => {
   if (!valor) return '';
   const limpio = valor.trim();
@@ -93,6 +96,13 @@ function ClubCard({ club }) {
           🏟️ {club.nombre}
         </h3>
       </div>
+      <div className="mt-2 w-full h-60 rounded-lg overflow-hidden border-2 border-white/20 shadow-sm">
+          <img 
+            src={imagenClub_00} 
+            alt={`Foto del club ${club.nombre}`} 
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
 
       {/* CUERPO */}
       <div className="p-5 flex-grow flex flex-col justify-between">

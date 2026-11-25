@@ -82,9 +82,21 @@ Gestión CRUD de Torneos (/torneos/nuevo, /torneos/editar/:id) con soporte para 
 
 Aprobación de cuentas pendientes y administración de roles (solo admin).
 
+
+
 🏗️ Arquitectura y Decisiones Técnicas
 Estructura Modular: Organización clara en components/ (tarjetas reutilizables, navbar, footer, rutas protegidas), pages/ (vistas principales y formularios), hooks/ (useFetch), services/ (instancia configurada de Axios), context/ (estado global de autenticación y tema) y constants/ (departamentos de Catamarca).
 
 Custom Hook useFetch: Centraliza el manejo de estados de carga (loading), errores (error) y datos (data) en las consultas públicas.
 
 Sincronización con Backend: El estado de sesión y los permisos de visualización en UI se sincronizan mediante JWT y validación de roles, delegando la seguridad crítica al servidor.
+
+
+## 🚀 Deploy en Producción
+*   **Frontend (Netlify):** [Pegá tu link de Netlify acá, ej: https://padel-catamarca-api.netlify.app]
+*   **Backend API (Render):** [Pegá tu link de Render acá, ej: https://padel-catamarca-api.onrender.com]
+
+## 🔐 Credenciales de Prueba 
+*   **Email:** `admin@padel.com`
+*   **Contraseña:** `admin123`
+*   *(Nota: El Backend en Render puede tardar ~50 segundos en despertar si estuvo inactivo).*

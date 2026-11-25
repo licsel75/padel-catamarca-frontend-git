@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import useFetch from '../hooks/useFetch';
 import ClubCard from '../components/cards/ClubCard';
 import { DEPARTAMENTOS_CATAMARCA } from '../constants/departamentos';
+import HistoriaSection from '../components/HistoriaSection';
 
 function Home() {
   // Consumo el listado público de clubes usando mi custom hook useFetch
@@ -205,6 +206,7 @@ function Home() {
           ))}
         </div>
       </section>
+        <HistoriaSection />
     </div>
   );
 }
