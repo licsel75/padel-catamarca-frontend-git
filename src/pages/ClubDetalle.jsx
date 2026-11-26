@@ -167,7 +167,7 @@ function ClubDetalle() {
           <div className="bg-amber-50 border-b border-amber-200 px-6 md:px-8 py-2.5 flex items-center justify-between gap-2">
             <p className="text-xs font-semibold text-amber-900">
               ⭐ <span className="font-extrabold">{club.nombre}</span> auspicia y apoya el desarrollo de{' '}
-              <span className="font-extrabold">Catamarca Pádel</span>.
+              <span className="font-extrabold">catamarcapadel.com.ar</span>.
             </p>
             <span className="hidden sm:inline text-[11px] font-bold text-amber-700 uppercase tracking-wider">
               Sede Destacada

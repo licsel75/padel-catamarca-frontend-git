@@ -49,6 +49,7 @@ function HistoriaSection() {
   // NUEVO: Premios del Círculo de Periodistas Deportivos de Catamarca
   const premiosCpdc = [
     { anio: "2009", ganador: "Cristian Diamante y Nicolás Codigoni" },
+    { anio: "2010", ganador: "Claudio Díaz y Héctor Selemin" },
     { anio: "2017", ganador: "Agustín Tapia" },
     { anio: "2021", ganador: "Facundo Sayes" },
     { anio: "2023", ganador: "Aaron Guevara" },
@@ -81,7 +82,7 @@ function HistoriaSection() {
               Para reconstruir los comienzos del pádel catamarqueño es necesario remontarse a la década de 1990, época en la que este deporte se expandía con fuerza por todo el país. Los primeros recuerdos ubican a clubes pioneros como <strong>Club Pelota Paleta</strong> y <strong>Handicap</strong> (hoy Handicap 4) como los espacios fundacionales.
             </p>
             <p className="text-sm leading-relaxed">
-              A ellos se sumaron <strong>Efe Pádel</strong> y las primeras canchas en villas veraniegas como <strong>El Rodeo</strong> y <strong>Balcozna</strong>, puntos de encuentro ineludibles durante los veranos. Se jugaba en canchas de cemento con paredes tradicionales, en una dinámica principalmente recreativa y familiar que fue generando los primeros grupos de jugadores.
+              A ellos se sumaron <strong>Efe Pádel</strong> y las primeras canchas en villas veraniegas como <strong>El Rodeo</strong> y <strong>La Puerta</strong>, puntos de encuentro ineludibles durante los veranos. Se jugaba en canchas de cemento con paredes tradicionales, en una dinámica principalmente recreativa y familiar que fue generando los primeros grupos de jugadores.
             </p>
 
             <h3 className="text-xl font-bold text-primary mb-3 mt-8">El crecimiento competitivo (2006-2008)</h3>
