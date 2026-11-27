@@ -118,8 +118,8 @@ Sincronización con Backend: El estado de sesión y los permisos de visualizaci�
 
 
 ## 🚀 Deploy en Producción
-*   **Frontend (Netlify):** [Pegá tu link de Netlify acá, ej: https://padel-catamarca-api.netlify.app]
-*   **Backend API (Render):** [Pegá tu link de Render acá, ej: https://padel-catamarca-api.onrender.com]
+*   **Frontend (Netlify):** https://catamarcapadel.netlify.app/
+*   **Backend API (Render):**  https://padel-catamarca-api.onrender.com
 
 ## 🔐 Credenciales de Prueba 
 *   **Email:** `admin@padel.com`

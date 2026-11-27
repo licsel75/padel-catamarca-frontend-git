@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router';
 import api from '../services/api';
 
-// Defino las opciones estándar de niveles para que el profesor marque con checkboxes
+// Defino los niveles de entrenamiento afuera del componente como una constante inmutable para evitar recrear el array en cada render
 const NIVELES_DISPONIBLES = [
   'Iniciación',
   '7ma',
@@ -16,6 +16,7 @@ const NIVELES_DISPONIBLES = [
 ];
 
 function ProfesorForm() {
+  // Inicializo react-hook-form con 'activo: true' por defecto para que, si es un perfil nuevo, ya nazca publicado
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
       activo: true
@@ -23,26 +24,32 @@ function ProfesorForm() {
   });
 
   const navigate = useNavigate();
+  
+  // Manejo en useState los catálogos externos y las selecciones múltiples (checkboxes y chips)
   const [clubesDisponibles, setClubesDisponibles] = useState([]);
   const [clubesSeleccionados, setClubesSeleccionados] = useState([]);
   const [nivelesSeleccionados, setNivelesSeleccionados] = useState([]);
+  
+  // Estados para controlar la pantalla de carga inicial y alertas de error del backend
   const [loadingDatos, setLoadingDatos] = useState(true);
   const [errorApi, setErrorApi] = useState(null);
 
+  // Uso watch('activo') para suscribirme en tiempo real al checkbox de estado y actualizar el texto explicativo de la UI dinámicamente
   const activoActual = watch('activo');
 
   useEffect(() => {
     const cargarDatosIniciales = async () => {
       setLoadingDatos(true);
       try {
-        // 1. Cargo el listado de clubes de la provincia para que el profe marque dónde da clases
+        // 1. Traigo todos los clubes disponibles para que el profesor marque en cuáles dicta clases
         const resClubes = await api.get('/clubes');
         setClubesDisponibles(resClubes.data);
 
-        // 2. Consulto si el profesor ya tiene un perfil publicitario guardado (patrón Upsert)
+        // 2. Consulto mi endpoint personalizado '/mi-perfil' que identifica al usuario por su token JWT en el backend
         const resPerfil = await api.get('/profesores/mi-perfil');
         const perfilExistente = resPerfil.data;
 
+        // Si el backend me devuelve un perfil previo, estoy en modo edición: hidrato todo el formulario
         if (perfilExistente) {
           setValue('titulo', perfilExistente.titulo);
           setValue('estudios', perfilExistente.estudios || '');
@@ -51,7 +58,7 @@ function ProfesorForm() {
           setValue('descripcion', perfilExistente.descripcion || '');
           setValue('activo', perfilExistente.activo);
 
-          // Precargo los IDs de los clubes y los niveles que ya tenía seleccionados
+          // Normalizo los clubes por si vienen populados desde MongoDB como objetos completos o solo como IDs
           setClubesSeleccionados(
             perfilExistente.clubes ? perfilExistente.clubes.map((c) => c._id || c) : []
           );
@@ -60,6 +67,7 @@ function ProfesorForm() {
       } catch (err) {
         setErrorApi('No se pudieron cargar los datos del formulario.');
       } finally {
+        // Me aseguro de liberar el estado de carga siempre, haya fallado o no
         setLoadingDatos(false);
       }
     };
@@ -67,14 +75,14 @@ function ProfesorForm() {
     cargarDatosIniciales();
   }, [setValue]);
 
-  // Manejador para marcar/desmarcar clubes sede
+  // Helper inmutable para agregar o quitar un club del array de seleccionados
   const toggleClub = (clubId) => {
     setClubesSeleccionados((prev) =>
       prev.includes(clubId) ? prev.filter((id) => id !== clubId) : [...prev, clubId]
     );
   };
 
-  // Manejador para marcar/desmarcar niveles de entrenamiento
+  // Helper inmutable para alternar los botones tipo chip de niveles
   const toggleNivel = (nivel) => {
     setNivelesSeleccionados((prev) =>
       prev.includes(nivel) ? prev.filter((n) => n !== nivel) : [...prev, nivel]
@@ -85,7 +93,7 @@ function ProfesorForm() {
     try {
       setErrorApi(null);
 
-      // Armo el payload combinando los inputs de texto con los arrays de clubes y niveles
+      // Construyo el payload explícito uniendo los campos validados por react-hook-form con mis estados locales
       const payload = {
         titulo: data.titulo,
         estudios: data.estudios,
@@ -97,20 +105,24 @@ function ProfesorForm() {
         activo: data.activo
       };
 
-      // Uso un único endpoint POST /profesores/mi-perfil que crea o actualiza según corresponda
+      // Implemento un patrón Upsert: uso siempre POST a '/profesores/mi-perfil' y dejo que el backend cree o actualice según el usuario logueado
       await api.post('/profesores/mi-perfil', payload);
+      
+      // Redirijo al panel tras guardar exitosamente
       navigate('/admin');
     } catch (err) {
       setErrorApi(err.response?.data?.error || 'Error al guardar tu anuncio profesional.');
     }
   };
 
+  // Early return para no mostrar un formulario vacío mientras resuelven las peticiones iniciales
   if (loadingDatos) {
     return <p className="text-center mt-16 text-gray-500">Cargando perfil profesional... ⏳</p>;
   }
 
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
+      {/* Navegación rápida para volver al panel sin perder contexto */}
       <Link to="/admin" className="inline-flex items-center text-sm font-bold text-primary hover:underline mb-6">
         ← Volver a Mi Panel
       </Link>
@@ -123,6 +135,7 @@ function ProfesorForm() {
           Esta tarjeta se mostrará en la sección pública de Profesores para que los jugadores te contacten por WhatsApp.
         </p>
 
+        {/* Banner condicional de error */}
         {errorApi && (
           <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-6 text-sm font-semibold">
             {errorApi}
@@ -130,7 +143,7 @@ function ProfesorForm() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* TÍTULO DEL ANUNCIO */}
+          {/* Título con validación de obligatoriedad y límite de caracteres alineado a la tarjeta pública */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
               Título del anuncio *
@@ -147,7 +160,7 @@ function ProfesorForm() {
             {errors.titulo && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.titulo.message}</p>}
           </div>
 
-          {/* ESTUDIOS / CERTIFICACIONES */}
+          {/* Campo opcional para credenciales deportivas */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
               Certificaciones / Experiencia (APA, AJPP, Categoría)
@@ -162,7 +175,7 @@ function ProfesorForm() {
             />
           </div>
 
-          {/* DÍAS Y HORARIOS */}
+          {/* Disponibilidad horaria */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
               Días y horarios disponibles *
@@ -181,7 +194,7 @@ function ProfesorForm() {
             )}
           </div>
 
-          {/* TELÉFONO WHATSAPP */}
+          {/* Teléfono formateado para generar enlaces directos a la API de WhatsApp (wa.me) */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
               WhatsApp de contacto (sin 0 ni 15) *
@@ -197,7 +210,7 @@ function ProfesorForm() {
             {errors.telefono && <p className="text-red-500 text-xs mt-1 font-semibold">{errors.telefono.message}</p>}
           </div>
 
-          {/* CLUBES DONDE DICTA CLASES */}
+          {/* Lista con scroll interno (max-h-48) para no alargar demasiado el formulario si hay muchos clubes */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
               Clubes donde dictás clases
@@ -222,7 +235,7 @@ function ProfesorForm() {
             </div>
           </div>
 
-          {/* NIVELES / CATEGORÍAS QUE ENTRENA */}
+          {/* Selector múltiple tipo chips para niveles */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
               Niveles y categorías que entrenás
@@ -233,7 +246,7 @@ function ProfesorForm() {
                 return (
                   <button
                     key={nivel}
-                    type="button"
+                    type="button" // Evito que el clic dispare el submit del form
                     onClick={() => toggleNivel(nivel)}
                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${
                       seleccionado
@@ -248,7 +261,7 @@ function ProfesorForm() {
             </div>
           </div>
 
-          {/* DESCRIPCIÓN BREVE */}
+          {/* Descripción libre con límite de caracteres para mantener estética uniforme en la grilla pública */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
               Descripción de tu metodología (Máx. 250 caracteres)
@@ -263,7 +276,7 @@ function ProfesorForm() {
             />
           </div>
 
-          {/* INTERRUPTOR PUBLICACIÓN ACTIVA / PAUSADA */}
+          {/* Interruptor de visibilidad: permite al profesor pausar su anuncio sin tener que borrarlo */}
           <div className="flex items-center justify-between bg-surface p-4 rounded-xl border border-gray-200">
             <div>
               <p className="text-sm font-bold text-primary">Estado de la publicación</p>
@@ -280,6 +293,7 @@ function ProfesorForm() {
             />
           </div>
 
+          {/* Botón submit protegido contra doble clic mediante isSubmitting */}
           <button
             type="submit"
             disabled={isSubmitting}
