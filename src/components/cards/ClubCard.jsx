@@ -92,6 +92,7 @@ function ClubCard({ club }) {
         </div>
 
         {/* Fila inferior: nombre completo del club a ancho total */}
+        
         <h3 className="font-bold text-base leading-snug line-clamp-2" title={club.nombre}>
           🏟️ {club.nombre}
         </h3>
