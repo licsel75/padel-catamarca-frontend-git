@@ -4,14 +4,12 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 
 function Layout() {
-  // Consumo el estado global de autenticación y el contexto de tema claro/oscuro
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const cerrarMenu = () => setMenuAbierto(false);
 
-  // Transformo el rol técnico de la base de datos a una etiqueta legible
   const formatearRol = (rol) => {
     const etiquetas = {
       admin: 'Admin',
@@ -23,20 +21,17 @@ function Layout() {
     return etiquetas[rol] || rol;
   };
 
-  // Helper 1: Estilo dinámico para el texto del enlace (resalta cuando está activo o al pasar el mouse)
   const linkClass = ({ isActive }) =>
-    `relative group font-bold text-sm py-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'
-    }`;
+    `relative group font-bold text-sm py-1 transition-colors ${isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'}`;
 
-  // Helper 2: Barra inferior verde lima que queda fija si la ruta está activa y se despliega en hover en las demás
   const underlineClass = (isActive) =>
-    `block h-0.5 bg-secondary transition-all duration-300 mt-0.5 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
-    }`;
+    `block h-0.5 bg-secondary transition-all duration-300 mt-0.5 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`;
 
   return (
     <div className="min-h-screen bg-surface font-display flex flex-col transition-colors duration-200">
       <header className="bg-white shadow-md sticky top-0 z-50 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3.5 flex justify-between items-center gap-4">
+          
           {/* IZQUIERDA: LOGO */}
           <Link
             to="/"
@@ -56,11 +51,29 @@ function Layout() {
                 </>
               )}
             </NavLink>
+            <NavLink to="/clubes" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <span>Clubes</span>
+                  <span className={underlineClass(isActive)} />
+                </>
+              )}
+            </NavLink>
 
             <NavLink to="/torneos" className={linkClass}>
               {({ isActive }) => (
                 <>
                   <span>Torneos</span>
+                  <span className={underlineClass(isActive)} />
+                </>
+              )}
+            </NavLink>
+
+            {/* 👇 LINK A HISTORIA AGREGADO CORRECTAMENTE 👇 */}
+            <NavLink to="/historia" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <span>Historia</span>
                   <span className={underlineClass(isActive)} />
                 </>
               )}
@@ -74,6 +87,7 @@ function Layout() {
                 </>
               )}
             </NavLink>
+             
 
             {user && (
               <Link
@@ -99,7 +113,6 @@ function Layout() {
                   Mi Panel
                 </NavLink>
 
-                {/* Saludo + Pastilla visual con el rol activo */}
                 <div className="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-lg border border-gray-200">
                   <span className="text-xs font-bold text-gray-700">Hola, {user.nombre}</span>
                   <span className="bg-primary text-secondary text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">
@@ -107,7 +120,6 @@ function Layout() {
                   </span>
                 </div>
 
-                {/* Botón interruptor Theme Claro / Oscuro */}
                 <button
                   type="button"
                   onClick={toggleTheme}
@@ -183,12 +195,29 @@ function Layout() {
             >
               Inicio
             </Link>
+
+             <Link
+              to="/clubes"
+              onClick={cerrarMenu}
+              className="font-semibold text-gray-700 py-2 border-b border-gray-100"
+            >
+              Clubes
+            </Link>
+
             <Link
               to="/torneos"
               onClick={cerrarMenu}
               className="font-semibold text-gray-700 py-2 border-b border-gray-100"
             >
               Torneos
+            </Link>
+            {/* 👇 LINK A HISTORIA EN EL MENÚ MOBILE 👇 */}
+            <Link
+              to="/historia"
+              onClick={cerrarMenu}
+              className="font-semibold text-gray-700 py-2 border-b border-gray-100"
+            >
+              Historia
             </Link>
             <Link
               to="/profesores"
