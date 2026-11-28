@@ -11,17 +11,23 @@ import AdminDashboard from './pages/AdminDashboard';
 import TorneoForm from './pages/TorneoForm';
 import UsuarioForm from './pages/UsuarioForm'; 
 import Sponsors from './pages/Sponsors';
+import TorneoDetalle from './pages/TorneoDetalle'; 
+import ClubDetalle from './pages/ClubDetalle';     
+
+
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
         {/* Rutas Públicas */}
-        <Route index element={<Home />} />
+       <Route index element={<Home />} />
         <Route path="torneos" element={<Torneos />} />
+        <Route path="torneos/:id" element={<TorneoDetalle />} />
         <Route path="clubes" element={<Clubes />} />
+        <Route path="clubes/:id" element={<ClubDetalle />} />     
         <Route path="historia" element={<Historia />} />
-        <Route path="profesores" element={<Profesores />} /> 
+        <Route path="profesores" element={<Profesores />} />
         <Route path="sponsors" element={<Sponsors />} />
         <Route path="login" element={<Login />} />
         
