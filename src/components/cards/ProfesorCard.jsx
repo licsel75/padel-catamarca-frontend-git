@@ -1,7 +1,9 @@
 function ProfesorCard({ perfil }) {
-  // Limpio el número de teléfono dejando solo dígitos para construir el enlace directo a WhatsApp
-  const telefonoLimpio = perfil.telefono?.replace(/\D/g, '');
-  const nombreProfe = perfil.usuario?.nombre || 'Profesor';
+  // 1. Protegemos el acceso al teléfono por si el Backend no lo envía
+  const telefonoLimpio = perfil?.telefono ? perfil.telefono.replace(/\D/g, '') : null;
+  const nombreProfe = perfil?.usuario?.nombre || 'Profesor';
+  const esDestacado = Boolean(perfil?.esDestacado);
+
   const whatsappUrl = telefonoLimpio
     ? `https://wa.me/549${telefonoLimpio}?text=${encodeURIComponent(
         `Hola ${nombreProfe}, vi tu anuncio "${perfil.titulo}" en Catamarca Pádel y quería consultar por clases.`
@@ -9,35 +11,42 @@ function ProfesorCard({ perfil }) {
     : null;
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col justify-between">
-      {/* CABECERA IDÉNTICA A TORNEO Y CLUB CARD */}
+    <div
+      className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col justify-between ${
+        esDestacado ? 'ring-2 ring-amber-400' : ''
+      }`}
+    >
+      {/* CABECERA */}
       <div className="bg-primary text-white p-3 flex justify-between items-center gap-2">
         <span className="font-bold text-sm truncate">🎓 {nombreProfe}</span>
-        <span className="bg-secondary text-primary text-xs font-bold px-2 py-1 rounded shrink-0">
-          PROFESOR
-        </span>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {esDestacado && (
+            <span className="bg-amber-400 text-slate-950 text-xs font-black px-2 py-1 rounded shadow-sm">
+              ⭐ DESTACADO
+            </span>
+          )}
+         
+        </div>
       </div>
 
-      {/* CUERPO DEL ANUNCIO */}
+      {/* CUERPO */}
       <div className="p-5 flex-grow space-y-3">
         <h3 className="text-lg font-extrabold text-primary leading-snug">
           {perfil.titulo}
         </h3>
 
-        {/* Credenciales o estudios (APA, AJPP, categoría) */}
         {perfil.estudios && (
           <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-lg">
             🏅 {perfil.estudios}
           </p>
         )}
 
-        {/* Días y horarios */}
         <p className="text-sm text-gray-700 flex items-start gap-1.5">
           <span>🕒</span>
           <span>{perfil.diasHorarios}</span>
         </p>
 
-        {/* Clubes donde dicta clases */}
         <p className="text-sm text-gray-600 flex items-start gap-1.5">
           <span>📍</span>
           <span>
@@ -47,21 +56,16 @@ function ProfesorCard({ perfil }) {
           </span>
         </p>
 
-        {/* Descripción breve */}
         {perfil.descripcion && (
           <p className="text-xs text-gray-500 italic leading-relaxed">
             "{perfil.descripcion}"
           </p>
         )}
 
-        {/* Etiquetas de niveles / categorías que entrena */}
         {perfil.niveles && perfil.niveles.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-2">
             {perfil.niveles.map((nivel) => (
-              <span
-                key={nivel}
-                className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded"
-              >
+              <span key={nivel} className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded">
                 {nivel}
               </span>
             ))}
@@ -69,7 +73,7 @@ function ProfesorCard({ perfil }) {
         )}
       </div>
 
-      {/* PIE CON BOTÓN DE CONTACTO DIRECTO */}
+      {/* PIE */}
       <div className="p-4 border-t border-gray-100">
         {whatsappUrl ? (
           <a
@@ -82,7 +86,7 @@ function ProfesorCard({ perfil }) {
           </a>
         ) : (
           <span className="block w-full text-center bg-gray-100 text-gray-500 font-bold py-2 rounded-lg text-sm">
-            📞 {perfil.telefono}
+            <p>📞 {perfil?.telefono || "Teléfono no disponible"}</p>
           </span>
         )}
       </div>

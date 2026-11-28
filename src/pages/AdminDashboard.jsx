@@ -26,6 +26,7 @@ function AdminDashboard() {
   const [clubes, setClubes] = useState([]);
   const [torneos, setTorneos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [profesores, setProfesores] = useState([]);
   const [favoritos, setFavoritos] = useState([]);
 
   // Estados para filtrar y ordenar el listado de usuarios en el panel de administración
@@ -70,15 +71,26 @@ function AdminDashboard() {
       }
 
       // 3. Únicamente el administrador descarga el listado completo de usuarios para moderación
+      
       if (esAdmin) {
-        const resUsers = await api.get('/users');
+        const [resUsers, resProfes] = await Promise.all([
+          api.get('/users'),
+          api.get('/profesores')
+        ]);
         setUsuarios(resUsers.data);
+        setProfesores(resProfes.data);
       }
     } catch (err) {
       setError('Error al cargar los datos del panel.');
     } finally {
       setLoading(false);
     }
+
+
+
+
+
+    
   };
 
   useEffect(() => {
@@ -106,6 +118,29 @@ function AdminDashboard() {
       alert(err.response?.data?.error || 'Error al eliminar el torneo');
     }
   };
+  // --- ACCIONES PROFESORES (SOLO ADMIN) ---
+  const handleToggleDestacadoProfesor = async (id) => {
+    try {
+      const res = await api.put(`/profesores/${id}/destacar`);
+      // Actualizo el estado local al instante para reflejar el cambio en la tabla
+      setProfesores((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, esDestacado: res.data.perfil.esDestacado } : p))
+      );
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al destacar profesor');
+    }
+  };
+
+  const handleDeleteProfesor = async (id) => {
+    if (!window.confirm('¿Seguro que querés eliminar el anuncio de este profesor?')) return;
+    try {
+      await api.delete(`/profesores/${id}`);
+      setProfesores((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al eliminar el perfil del profesor');
+    }
+  };
+
 
   // --- ACCIONES USUARIOS (MODERACIÓN EXCLUSIVA DEL ADMIN) ---
   const handleAprobarUsuario = async (id) => {
@@ -119,6 +154,8 @@ function AdminDashboard() {
       alert(err.response?.data?.error || 'Error al aprobar usuario');
     }
   };
+
+
 
   const handleToggleBloqueo = async (id) => {
     try {
@@ -240,18 +277,16 @@ function AdminDashboard() {
           <>
             <button
               onClick={() => setTab('clubes')}
-              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-                tab === 'clubes' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${tab === 'clubes' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+                }`}
             >
               {esAdmin ? `Clubes (${clubes.length})` : `Mis Clubes (${clubes.length}/5)`}
             </button>
 
             <button
               onClick={() => setTab('torneos')}
-              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-                tab === 'torneos' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${tab === 'torneos' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+                }`}
             >
               {esAdmin ? `Torneos (${torneos.length})` : `Mis Torneos (${torneos.length})`}
             </button>
@@ -259,21 +294,37 @@ function AdminDashboard() {
         )}
 
         {esAdmin && (
-          <button
-            onClick={() => setTab('usuarios')}
-            className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-              tab === 'usuarios' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Usuarios ({usuarios.length})
-          </button>
+          <>
+            <button
+              onClick={() => setTab('profesores')}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
+                tab === 'profesores' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Profesores ({profesores.length})
+            </button>
+
+            <button
+              onClick={() => setTab('usuarios')}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
+                tab === 'usuarios' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Usuarios ({usuarios.length})
+            </button>
+          </>
         )}
+
+       
+
+
+
+
 
         <button
           onClick={() => setTab('favoritos')}
-          className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-            tab === 'favoritos' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
-          }`}
+          className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${tab === 'favoritos' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
         >
           Mis Favoritos ({favoritos.length})
         </button>
@@ -375,6 +426,67 @@ function AdminDashboard() {
           </table>
           {torneos.length === 0 && (
             <p className="text-center p-10 text-gray-500">No hay torneos creados todavía.</p>
+          )}
+        </div>
+      )}
+
+      {/* ==================== TAB: PROFESORES (SOLO ADMIN) ==================== */}
+      {tab === 'profesores' && esAdmin && (
+        <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-primary text-white">
+              <tr>
+                <th className="p-4">Profesor</th>
+                <th className="p-4">Título / Especialidad</th>
+                <th className="p-4">Teléfono</th>
+                <th className="p-4 text-center">Estado</th>
+                <th className="p-4 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {profesores.map((prof) => (
+                <tr key={prof._id} className="border-b border-gray-100 hover:bg-surface">
+                  <td className="p-4 font-semibold">
+                    {prof.usuario?.nombre || 'Sin nombre'}
+                  </td>
+                  <td className="p-4 text-sm text-gray-600">{prof.titulo}</td>
+                  <td className="p-4 text-sm text-gray-600">{prof.telefono}</td>
+                  <td className="p-4 text-center">
+                    {prof.esDestacado ? (
+                      <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">
+                        ⭐ DESTACADO
+                      </span>
+                    ) : (
+                      <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        Estándar
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-4 flex justify-center items-center gap-3">
+                    <button
+                      onClick={() => handleToggleDestacadoProfesor(prof._id)}
+                      className={`px-3 py-1 rounded text-xs font-bold cursor-pointer transition-colors ${
+                        prof.esDestacado
+                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : 'bg-amber-400 text-primary hover:bg-amber-500'
+                      }`}
+                    >
+                      {prof.esDestacado ? 'Quitar Destacado' : '⭐ Destacar'}
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteProfesor(prof._id)}
+                      className="text-red-500 hover:text-red-700 font-semibold text-sm cursor-pointer"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {profesores.length === 0 && (
+            <p className="text-center p-10 text-gray-500">No hay anuncios de profesores cargados todavía.</p>
           )}
         </div>
       )}
@@ -498,11 +610,10 @@ function AdminDashboard() {
                         {u._id !== user.id && (
                           <button
                             onClick={() => handleToggleBloqueo(u._id)}
-                            className={`px-3 py-1 rounded text-xs font-bold cursor-pointer ${
-                              u.bloqueado
-                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                : 'bg-red-100 text-red-600 hover:bg-red-200'
-                            }`}
+                            className={`px-3 py-1 rounded text-xs font-bold cursor-pointer ${u.bloqueado
+                              ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                              : 'bg-red-100 text-red-600 hover:bg-red-200'
+                              }`}
                           >
                             {u.bloqueado ? 'Desbloquear' : 'Bloquear'}
                           </button>

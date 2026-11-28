@@ -31,7 +31,7 @@ function Layout() {
     <div className="min-h-screen bg-surface font-display flex flex-col transition-colors duration-200">
       <header className="bg-white shadow-md sticky top-0 z-50 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3.5 flex justify-between items-center gap-4">
-          
+
           {/* IZQUIERDA: LOGO */}
           <Link
             to="/"
@@ -69,7 +69,17 @@ function Layout() {
               )}
             </NavLink>
 
-            {/* 👇 LINK A HISTORIA AGREGADO CORRECTAMENTE 👇 */}
+            
+            <NavLink to="/profesores" className={linkClass}>
+              {({ isActive }) => (
+                <>
+                  <span>Profesores</span>
+                  <span className={underlineClass(isActive)} />
+                </>
+              )}
+            </NavLink>
+
+          
             <NavLink to="/historia" className={linkClass}>
               {({ isActive }) => (
                 <>
@@ -79,15 +89,16 @@ function Layout() {
               )}
             </NavLink>
 
-            <NavLink to="/profesores" className={linkClass}>
+              <NavLink to="/NuestrosSponsosrs" className={linkClass}>
               {({ isActive }) => (
                 <>
-                  <span>Profesores</span>
+                  <span>Nuestros Sponsors</span>
                   <span className={underlineClass(isActive)} />
                 </>
               )}
             </NavLink>
-             
+
+
 
             {user && (
               <Link
@@ -196,7 +207,7 @@ function Layout() {
               Inicio
             </Link>
 
-             <Link
+            <Link
               to="/clubes"
               onClick={cerrarMenu}
               className="font-semibold text-gray-700 py-2 border-b border-gray-100"
@@ -211,14 +222,7 @@ function Layout() {
             >
               Torneos
             </Link>
-            {/* 👇 LINK A HISTORIA EN EL MENÚ MOBILE 👇 */}
-            <Link
-              to="/historia"
-              onClick={cerrarMenu}
-              className="font-semibold text-gray-700 py-2 border-b border-gray-100"
-            >
-              Historia
-            </Link>
+
             <Link
               to="/profesores"
               onClick={cerrarMenu}
@@ -226,6 +230,24 @@ function Layout() {
             >
               Profesores
             </Link>
+
+            <Link
+              to="/historia"
+              onClick={cerrarMenu}
+              className="font-semibold text-gray-700 py-2 border-b border-gray-100"
+            >
+              Historia
+            </Link>
+
+            <Link
+              to="/"
+              onClick={cerrarMenu}
+              className="font-semibold text-gray-700 py-2 border-b border-gray-100"
+            >
+              Nuestros Sponsors
+            </Link>
+
+
 
             {user ? (
               <>
