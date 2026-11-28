@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import TorneoForm from './pages/TorneoForm';
 import UsuarioForm from './pages/UsuarioForm'; 
+import Sponsors from './pages/Sponsors';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="clubes" element={<Clubes />} />
         <Route path="historia" element={<Historia />} />
         <Route path="profesores" element={<Profesores />} /> 
+        <Route path="sponsors" element={<Sponsors />} />
         <Route path="login" element={<Login />} />
         
         {/* Rutas Protegidas (Gestores y Admin) */}

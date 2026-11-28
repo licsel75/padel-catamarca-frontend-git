@@ -89,10 +89,10 @@ function Layout() {
               )}
             </NavLink>
 
-              <NavLink to="/NuestrosSponsosrs" className={linkClass}>
+              <NavLink to="/sponsors" className={linkClass}>
               {({ isActive }) => (
                 <>
-                  <span>Nuestros Sponsors</span>
+                  <span>Sponsors</span>
                   <span className={underlineClass(isActive)} />
                 </>
               )}
@@ -240,11 +240,11 @@ function Layout() {
             </Link>
 
             <Link
-              to="/"
+              to="/sponsors"
               onClick={cerrarMenu}
               className="font-semibold text-gray-700 py-2 border-b border-gray-100"
             >
-              Nuestros Sponsors
+              Sponsors
             </Link>
 
 
